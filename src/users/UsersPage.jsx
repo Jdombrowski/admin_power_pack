@@ -326,6 +326,10 @@ export class UsersPage extends React.Component {
         if (activeFilterButtons.includes("noGroup")) {
             filteredUsers = filteredUsers.filter(u => !u.groupsMap)
         }
+        // groupsMap
+        if (activeFilterButtons.includes("noGroup")) {
+            filteredUsers = filteredUsers.filter(u => !u.groupsMap)
+        }
         if (activeFilterButtons.includes("disabled")) {
             filteredUsers = filteredUsers.filter(u => u.is_disabled)
         }

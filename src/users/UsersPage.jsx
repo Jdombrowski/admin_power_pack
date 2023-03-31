@@ -320,7 +320,11 @@ export class UsersPage extends React.Component {
             filteredUsers = filteredUsers.filter(u => !u.display_name)
         }
         if (activeFilterButtons.includes("noEmail")) {
-            filteredUsers = filteredUsers.filter(u => !u.credentials_email)
+            filteredUsers = filteredUsers.filter(u => !u.groupsMap)
+        }
+        // groupsMap
+        if (activeFilterButtons.includes("noGroup")) {
+            filteredUsers = filteredUsers.filter(u => !u.groupsMap)
         }
         // groupsMap
         if (activeFilterButtons.includes("noGroup")) {
@@ -467,8 +471,7 @@ export class UsersPage extends React.Component {
         const quickFilterGroup =
             <ButtonGroup value={this.state.activeFilterButtons} onChange={this.onChangeActiveFilterButtons}>
                 <ButtonItem value="blankName">Blank name</ButtonItem>
-                <ButtonItem value="noEmail">No email</ButtonItem>
-                <ButtonItem value="noGroup">No group</ButtonItem>
+                <ButtonItem value="noEmail">No group</ButtonItem>
                 <ButtonItem value="noSSO">No SSO</ButtonItem>
                 <ButtonItem value="duplicateEmails">Duplicate Emails</ButtonItem>
                 <ButtonItem value="duplicateNames">Duplicate Names</ButtonItem>

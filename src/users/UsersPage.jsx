@@ -30,15 +30,15 @@ import { ActionsBar } from './ActionsBar'
 import { UsersTable } from './UsersTable'
 import { USER_FIELDS, TABLE_COLUMNS, CREDENTIALS_INFO } from './constants'
 import { makeLookerCaller } from '../shared/utils'
-import { 
-    Banner, 
+import {
+    Banner,
     doDefaultActionListSort,
     InputSearch, ButtonGroup, ButtonItem, Select
 } from '@looker/components'
 
 export class UsersPage extends React.Component {
     static contextType = ExtensionContext // provides the coreSDK object
-    
+
     /*
      ******************* React lifecycle methods *******************
      */
@@ -46,7 +46,7 @@ export class UsersPage extends React.Component {
         super(props)
 
         this.searchTimeout = React.createRef()
-        
+
         this.state = {
             tableColumns: TABLE_COLUMNS.slice(),
             sortColumn: 'id',
@@ -134,7 +134,7 @@ export class UsersPage extends React.Component {
             // }
 
             const [userResult, groupsResult, rolesResult, userAttResult] = await Promise.all([
-                // userGrabber,                
+                // userGrabber,
                 this.lookerRequest('all_users', {fields: USER_FIELDS}),
                 this.lookerRequest('all_groups', {}),
                 this.lookerRequest('all_roles', {}),
@@ -143,13 +143,13 @@ export class UsersPage extends React.Component {
 
             // console.log("~~~~~ All Users (count) ~~~~")
             // console.log(userResult)
-            // console.log("~~~~~ All Groups ~~~~")
-            // console.log(groupsResult)
+            console.log("~~~~~ All Groups ~~~~")
+            console.log(groupsResult)
             // console.log("~~~~~ All Roles ~~~~")
             // console.log(rolesResult)
             // console.log("~~~~~ All User Attributes ~~~~")
             // console.log(userAttResult)
-            
+
             const new_usersMap = new Map(userResult.map(u => [u.id, u]))
             const new_groupsMap = new Map(groupsResult.map(g => [g.id, g]))
             const new_rolesMap = new Map(rolesResult.map(r => [r.id, r]))
@@ -188,7 +188,7 @@ export class UsersPage extends React.Component {
         // If anything is currently selected, then we toggle all off
         // If nothing is selected then we toggle all on
         const doAll = (this.state.selectedUserIds.size === 0)
-        
+
         // Populate from usersList because only the visible rows should be selected
         const new_selectedUserIds = doAll ? new Set(this.state.usersList.map(u => u.id)) : new Set()
 
@@ -197,8 +197,8 @@ export class UsersPage extends React.Component {
 
     onSelectRow = (user_id) => {
         const new_selectedUserIds = new Set(this.state.selectedUserIds)
-        
-        // If delete returns true then that means the user was previously selected 
+
+        // If delete returns true then that means the user was previously selected
         if (!new_selectedUserIds.delete(user_id)) {
             new_selectedUserIds.add(user_id)
         }
@@ -215,18 +215,18 @@ export class UsersPage extends React.Component {
      */
     onChangeSearch = (e) => {
         clearTimeout(this.searchTimeout.current)
-        
+
         // If `e.persist` doesn't exist, a user has clicked the `x` button in the
         // InputSearch to clear the field. The event fired is a button click, and
-        // NOT a React Synthetic event, so we have to treat it differently.        
+        // NOT a React Synthetic event, so we have to treat it differently.
         if (!e.persist) {
             this.setState({searchText: ''})
             this.runSearch('')
         } else {
             e.persist()
-            
+
             this.setState({searchText: e.currentTarget.value})
-        
+
             if (this.searchTimeout) {
                 this.searchTimeout.current = window.setTimeout(() => {
                     this.runSearch(e.target.value)
@@ -237,7 +237,7 @@ export class UsersPage extends React.Component {
 
     runSearch(searchText) {
         // Re-filter and re-sort. searchText is passed in to avoid race condition on state
-        const filteredUsers = this.makeFilteredUsersList(undefined, searchText, undefined)        
+        const filteredUsers = this.makeFilteredUsersList(undefined, searchText, undefined)
         const {data: new_usersList} = this.makeSortedUsersList(filteredUsers)
 
         // Persist
@@ -247,7 +247,7 @@ export class UsersPage extends React.Component {
     onChangeActiveFilterButtons = (new_activeFilterButtons) => {
         let updated_activeFilterButtons = new_activeFilterButtons;
         const lastFilter = new_activeFilterButtons.slice(-1)[0]
-        
+
         switch (lastFilter) {
             case "disabled":
                 updated_activeFilterButtons = updated_activeFilterButtons.filter(f => f !== "notDisabled")
@@ -259,11 +259,11 @@ export class UsersPage extends React.Component {
 
         // Update the button state right away
         this.setState({activeFilterButtons: updated_activeFilterButtons})
-        
+
         // Re-filter and re-sort. updated_activeFilterButtons passed in to avoid race condition on state
         const filteredUsers = this.makeFilteredUsersList(undefined, undefined, updated_activeFilterButtons)
         const {data: new_usersList} = this.makeSortedUsersList(filteredUsers)
-        
+
         // Persist
         this.setState({usersList: new_usersList, currentPage: 1})
     }
@@ -271,19 +271,19 @@ export class UsersPage extends React.Component {
     onChangeActiveShowWhoButton = (new_activeShowWhoButton) => {
         // Update the button state right away
         this.setState({activeShowWhoButton: new_activeShowWhoButton})
-        
+
         // Re-filter and re-sort. new_activeShowWhoButton passed in to avoid race condition on state
         const filteredUsers = this.makeFilteredUsersList(undefined, undefined, undefined, new_activeShowWhoButton)
         const {data: new_usersList} = this.makeSortedUsersList(filteredUsers)
-        
+
         // Persist
         this.setState({usersList: new_usersList, currentPage: 1})
     }
 
-    makeFilteredUsersList(usersMap = undefined, 
-                        searchText = undefined, 
-                        activeFilterButtons = undefined, 
-                        activeShowWhoButton = undefined) {
+    makeFilteredUsersList(usersMap = undefined,
+                          searchText = undefined,
+                          activeFilterButtons = undefined,
+                          activeShowWhoButton = undefined) {
         // This function can take the various state values as props so that we don't have
         // to `await` for state changes to persist before calling - avoids race conditions.
         // But those props can also be omitted for convenience, eg when calling from the load procedure.
@@ -293,7 +293,7 @@ export class UsersPage extends React.Component {
         if (searchText === undefined) searchText = this.state.searchText
         if (activeFilterButtons === undefined) activeFilterButtons = this.state.activeFilterButtons
         if (activeShowWhoButton === undefined) activeShowWhoButton = this.state.activeShowWhoButton
-        
+
         // Step 0: get a fresh array of all users
         let filteredUsers = Array.from(usersMap.values())
 
@@ -322,6 +322,10 @@ export class UsersPage extends React.Component {
         if (activeFilterButtons.includes("noEmail")) {
             filteredUsers = filteredUsers.filter(u => !u.credentials_email)
         }
+        // groupsMap
+        if (activeFilterButtons.includes("noGroup")) {
+            filteredUsers = filteredUsers.filter(u => !u.groupsMap)
+        }
         if (activeFilterButtons.includes("disabled")) {
             filteredUsers = filteredUsers.filter(u => u.is_disabled)
         }
@@ -330,7 +334,7 @@ export class UsersPage extends React.Component {
         }
         if (activeFilterButtons.includes("noSSO")) {
             const sso_cred_names = CREDENTIALS_INFO.filter(c => c.is_sso).map(c => c.name)
-            filteredUsers = filteredUsers.filter(user => 
+            filteredUsers = filteredUsers.filter(user =>
                 !sso_cred_names.map(cred_name => !!user[cred_name]).includes(true)
             )
         }
@@ -368,7 +372,7 @@ export class UsersPage extends React.Component {
                     || u.email?.toLowerCase().includes(searchText)
                 )
             })
-        }    
+        }
 
         // Step 4: get outta here
         return filteredUsers
@@ -383,10 +387,10 @@ export class UsersPage extends React.Component {
         // for the sort critera or actually persisting the new tableColumns.
 
         const {
-          columns: new_tableColumns,
-          data: new_usersList,
+            columns: new_tableColumns,
+            data: new_usersList,
         } = this.makeSortedUsersList(this.state.usersList, columnId, sortDirection)
-        
+
         this.setState({
             tableColumns: new_tableColumns,
             usersList: new_usersList,
@@ -401,7 +405,7 @@ export class UsersPage extends React.Component {
 
         if (columnId === undefined) columnId = this.state.sortColumn
         if (sortDirection === undefined) sortDirection = this.state.sortDirection
-        
+
         let newArrayToSort = arrayToSort
         if (columnId === 'display_name') {
             newArrayToSort = arrayToSort.map(u => {
@@ -413,13 +417,13 @@ export class UsersPage extends React.Component {
 
         // This thing looks like: `{columns: newColumnsObj, data: sortedDataArray}`
         const resultObj = doDefaultActionListSort(newArrayToSort, this.state.tableColumns, columnId, sortDirection)
-        
+
         return resultObj
     }
 
     /*
      ******************* PAGINATION *******************
-     */ 
+     */
     onChangePage = (new_currentPage) => {
         this.setState({currentPage: new_currentPage})
     }
@@ -430,12 +434,12 @@ export class UsersPage extends React.Component {
 
     /*
      ******************* RENDERING *******************
-     */    
+     */
     render() {
         const errorBanner = !this.state.errorMessage ? null : <Banner intent='error'>{this.state.errorMessage}</Banner>
 
-        const actionsBar = 
-            <ActionsBar 
+        const actionsBar =
+            <ActionsBar
                 isLoading={this.state.isLoading}
                 selectedUserIds={this.state.selectedUserIds}
                 usersMap={this.state.usersMap}
@@ -445,41 +449,42 @@ export class UsersPage extends React.Component {
                 loadUsersAndStuff={this.loadUsersAndStuff}
                 setNewSelectedUserIds={this.setNewSelectedUserIds}
             />
-                               
-        const showWhoToggle = 
-            <Select 
+
+        const showWhoToggle =
+            <Select
                 width={150}
                 onChange={this.onChangeActiveShowWhoButton}
                 defaultValue="regular"
                 options={[
-                  { value: 'all', label: 'All Users' },
-                  { value: 'regular', label: 'Regular Users' },
-                  { value: 'embed', label: 'Embed Users' },
-                  { value: 'lookerSupport', label: 'Looker Support' },
-                  { value: 'selected', label: 'Only Selected' },
+                    { value: 'all', label: 'All Users' },
+                    { value: 'regular', label: 'Regular Users' },
+                    { value: 'embed', label: 'Embed Users' },
+                    { value: 'lookerSupport', label: 'Looker Support' },
+                    { value: 'selected', label: 'Only Selected' },
                 ]}
             />
-             
-        const quickFilterGroup = 
+
+        const quickFilterGroup =
             <ButtonGroup value={this.state.activeFilterButtons} onChange={this.onChangeActiveFilterButtons}>
                 <ButtonItem value="blankName">Blank name</ButtonItem>
                 <ButtonItem value="noEmail">No email</ButtonItem>
+                <ButtonItem value="noGroup">No group</ButtonItem>
                 <ButtonItem value="noSSO">No SSO</ButtonItem>
                 <ButtonItem value="duplicateEmails">Duplicate Emails</ButtonItem>
                 <ButtonItem value="duplicateNames">Duplicate Names</ButtonItem>
                 <ButtonItem value="disabled">Disabled</ButtonItem>
                 <ButtonItem value="notDisabled">Not Disabled</ButtonItem>
             </ButtonGroup>
-                  
-        const searchInput = 
-            <InputSearch 
-                value={this.state.searchText} 
-                onChange={this.onChangeSearch} 
-                width="20rem" 
+
+        const searchInput =
+            <InputSearch
+                value={this.state.searchText}
+                onChange={this.onChangeSearch}
+                width="20rem"
                 placeholder="Search by name, email, id"
             />
-               
-        const usersTable = 
+
+        const usersTable =
             <UsersTable
                 isLoading={this.state.isLoading}
                 usersList={this.state.usersList}
